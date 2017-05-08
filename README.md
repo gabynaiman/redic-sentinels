@@ -7,6 +7,7 @@
 [![Dependency Status](https://gemnasium.com/gabynaiman/redic-sentinels.svg)](https://gemnasium.com/gabynaiman/redic-sentinels)
 
 Redic::Sentinels is a wrapper for the Redis client that fetches configuration details from sentinels.
+
 Based on [soveran/redisent](https://github.com/soveran/redisent)
 
 ## Installation
