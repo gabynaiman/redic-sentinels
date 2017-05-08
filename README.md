@@ -29,13 +29,13 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-sentinels = [
+hosts = [
   'localhost:26379',
   'localhost:26380',
   'localhost:26381'
 ]
 
-redis = Redic::Sentinels.new sentinels: sentinels, 
+redis = Redic::Sentinels.new hosts: hosts, 
                              master_name: 'mymaster', 
                              db: 1, # optional (default: 0)
                              password: 'pass' # optional
