@@ -11,7 +11,7 @@ class Redic
     attr_reader :hosts, :master_name, :password, :db, :timeout, :client
 
     def initialize(options)
-      @hosts   = options.fetch(:hosts)
+      @hosts       = options.fetch(:hosts)
       @master_name = options.fetch(:master_name)
       @password    = options[:password]
       @db          = options.fetch(:db, 0)
