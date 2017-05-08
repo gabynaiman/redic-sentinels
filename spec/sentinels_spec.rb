@@ -41,6 +41,14 @@ describe Redic::Sentinels do
       redis.commit.must_equal ['PONG', 'PONG']
     end
 
+    it 'clear' do
+      redis.queue 'PING'
+      redis.client.buffer.must_equal [['PING']]
+
+      redis.clear
+      redis.client.buffer.must_be_empty
+    end
+
     it 'Retry on connection failures' do
       redis.call('PING').must_equal 'PONG'
 
