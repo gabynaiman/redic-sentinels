@@ -1,6 +1,4 @@
-require 'simplecov'
-SimpleCov.start
-
+require 'coverage_helper'
 require 'redic-sentinels'
 require 'minitest/autorun'
 require 'minitest/colorin'
