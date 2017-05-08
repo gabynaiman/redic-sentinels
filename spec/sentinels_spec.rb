@@ -2,28 +2,33 @@ require_relative 'minitest_helper'
 
 describe Redic::Sentinels do
 
-  SENTINEL_VALID_HOSTS = [
+  VALID_HOSTS = [
     'localhost:26379',
     'localhost:26380',
     'localhost:26381'
   ].shuffle
 
-  SENTINEL_INVALID_HOSTS = [
+  INVALID_HOSTS = [
     'localhost:26382',
     'localhost:26383'
   ].shuffle
 
-  SENTINEL_HOSTS = (SENTINEL_VALID_HOSTS + SENTINEL_INVALID_HOSTS).shuffle
+  HOSTS = (VALID_HOSTS + INVALID_HOSTS).shuffle
 
   MASTER_NAME = 'mymaster'
 
   def disconnect(redis)
-    redis.client.configure "redis://#{SENTINEL_INVALID_HOSTS.sample}"
+    redis.client.configure "redis://#{INVALID_HOSTS.sample}"
+  end
+
+  after do
+    master = Redic.new 'redis://localhost:16379'
+    master.call! 'FLUSHDB'
   end
 
   describe 'Connection success' do
 
-    let(:redis) { Redic::Sentinels.new sentinels: SENTINEL_HOSTS, master_name: MASTER_NAME }
+    let(:redis) { Redic::Sentinels.new hosts: HOSTS, master_name: MASTER_NAME }
 
     it 'call' do
       redis.call('PING').must_equal 'PONG'
@@ -49,6 +54,12 @@ describe Redic::Sentinels do
       redis.client.buffer.must_be_empty
     end
 
+    it 'get/set' do
+      redis.call!('GET', 'key1').must_be_nil
+      redis.call! 'SET', 'key1', 'value1'
+      redis.call!('GET', 'key1').must_equal 'value1'
+    end
+
     it 'Retry on connection failures' do
       redis.call('PING').must_equal 'PONG'
 
@@ -64,17 +75,17 @@ describe Redic::Sentinels do
     end
 
     it 'Default DB' do
-      redis.client.url.must_equal 'redis://127.0.0.1:16380/0'
+      redis.client.url.must_equal 'redis://127.0.0.1:16379/0'
     end
 
     it 'Custom DB' do
-      redis = Redic::Sentinels.new sentinels: SENTINEL_HOSTS, master_name: MASTER_NAME, db: 7
-      redis.client.url.must_equal 'redis://127.0.0.1:16380/7'
+      redis = Redic::Sentinels.new hosts: HOSTS, master_name: MASTER_NAME, db: 7
+      redis.client.url.must_equal 'redis://127.0.0.1:16379/7'
     end
 
     it 'Auth' do
-      redis = Redic::Sentinels.new sentinels: SENTINEL_HOSTS, master_name: MASTER_NAME, password: 'pass'
-      redis.client.url.must_equal 'redis://:pass@127.0.0.1:16380/0'
+      redis = Redic::Sentinels.new hosts: HOSTS, master_name: MASTER_NAME, password: 'pass'
+      redis.client.url.must_equal 'redis://:pass@127.0.0.1:16379/0'
     end
 
   end
@@ -83,15 +94,15 @@ describe Redic::Sentinels do
     
     it 'Invalid hosts' do
       invalid_hosts = ['localhost:26382', 'localhost:26383']
-      proc { Redic::Sentinels.new sentinels: invalid_hosts, master_name: MASTER_NAME }.must_raise Redic::Sentinels::UnreachableHosts
+      proc { Redic::Sentinels.new hosts: invalid_hosts, master_name: MASTER_NAME }.must_raise Redic::Sentinels::UnreachableHosts
     end
 
     it 'Whithout hosts' do
-      proc { Redic::Sentinels.new sentinels: [], master_name: MASTER_NAME }.must_raise Redic::Sentinels::UnreachableHosts
+      proc { Redic::Sentinels.new hosts: [], master_name: MASTER_NAME }.must_raise Redic::Sentinels::UnreachableHosts
     end
 
     it 'Invalid master' do
-      proc { Redic::Sentinels.new sentinels: SENTINEL_VALID_HOSTS, master_name: 'invalid_master' }.must_raise Redic::Sentinels::UnknownMaster
+      proc { Redic::Sentinels.new hosts: VALID_HOSTS, master_name: 'invalid_master' }.must_raise Redic::Sentinels::UnknownMaster
     end
 
   end

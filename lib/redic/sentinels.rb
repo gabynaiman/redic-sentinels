@@ -8,10 +8,10 @@ class Redic
     class UnreachableHosts < ArgumentError; end
     class UnknownMaster < ArgumentError; end
 
-    attr_reader :sentinels, :master_name, :password, :db, :timeout, :client
+    attr_reader :hosts, :master_name, :password, :db, :timeout, :client
 
     def initialize(options)
-      @sentinels   = options.fetch(:sentinels)
+      @hosts   = options.fetch(:hosts)
       @master_name = options.fetch(:master_name)
       @password    = options[:password]
       @db          = options.fetch(:db, 0)
@@ -55,7 +55,7 @@ class Redic
     end
 
     def establish_connection
-      sentinels.each do |host|
+      hosts.each do |host|
         begin
           sentinel = Redic.new "redis://#{host}"
 
