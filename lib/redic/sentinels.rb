@@ -8,7 +8,7 @@ class Redic
     class UnreachableHosts < ArgumentError; end
     class UnknownMaster < ArgumentError; end
 
-    attr_reader :hosts, :master_name, :password, :db, :timeout, :client
+    attr_reader :hosts, :master_name, :password, :db, :timeout
 
     def initialize(options)
       @hosts       = options.fetch(:hosts)
@@ -21,31 +21,49 @@ class Redic
     end
 
     def call(*args)
-      forward { client.call *args }
+      forward { redis.call *args }
     end
 
     def call!(*args)
-      forward { client.call! *args }
+      forward { redis.call! *args }
     end
 
     def queue(*args)
-      forward { client.queue *args }
-    end
-
-    def clear
-      forward { client.clear }
+      forward { redis.queue *args }
     end
 
     def commit
-      buffer = client.buffer
+      buffer = redis.buffer
 
       forward do
-        client.buffer.replace(buffer)
-        client.commit
+        redis.buffer.replace(buffer)
+        redis.commit
       end
     end
 
+    def buffer
+      forward { redis.buffer }
+    end
+
+    def reset
+      forward { redis.reset }
+    end
+
+    def clear
+      forward { redis.clear }
+    end
+
+    def client
+      forward { redis.client }
+    end
+
+    def url
+      forward { redis.url }
+    end
+
     private
+
+    attr_reader :redis
 
     def forward
       yield
@@ -62,7 +80,7 @@ class Redic
           ip, port = sentinel.call 'SENTINEL', 'get-master-addr-by-name', master_name
           raise UnknownMaster if ip.nil? && port.nil?
 
-          @client = Redic.new "redis://#{password ? ":#{password}@" : ''}#{ip}:#{port}/#{db}"
+          @redis = Redic.new *["redis://#{password ? ":#{password}@" : ''}#{ip}:#{port}/#{db}", timeout].compact
           return
 
         rescue Errno::ECONNREFUSED

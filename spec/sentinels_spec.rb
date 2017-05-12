@@ -18,7 +18,7 @@ describe Redic::Sentinels do
   MASTER_NAME = 'mymaster'
 
   def disconnect(redis)
-    redis.client.configure "redis://#{INVALID_HOSTS.sample}"
+    redis.client.configure "redis://#{INVALID_HOSTS.sample}", 10_000_000
   end
 
   after do
@@ -46,12 +46,18 @@ describe Redic::Sentinels do
       redis.commit.must_equal ['PONG', 'PONG']
     end
 
-    it 'clear' do
+    it 'clear/reset' do
       redis.queue 'PING'
-      redis.client.buffer.must_equal [['PING']]
+      redis.buffer.must_equal [['PING']]
 
       redis.clear
-      redis.client.buffer.must_be_empty
+      redis.buffer.must_be_empty
+
+      redis.queue 'PING'
+      redis.buffer.must_equal [['PING']]
+
+      redis.reset
+      redis.buffer.must_be_empty
     end
 
     it 'get/set' do
@@ -75,17 +81,17 @@ describe Redic::Sentinels do
     end
 
     it 'Default DB' do
-      redis.client.url.must_equal 'redis://127.0.0.1:16379/0'
+      redis.url.must_equal 'redis://127.0.0.1:16379/0'
     end
 
     it 'Custom DB' do
       redis = Redic::Sentinels.new hosts: HOSTS, master_name: MASTER_NAME, db: 7
-      redis.client.url.must_equal 'redis://127.0.0.1:16379/7'
+      redis.url.must_equal 'redis://127.0.0.1:16379/7'
     end
 
     it 'Auth' do
       redis = Redic::Sentinels.new hosts: HOSTS, master_name: MASTER_NAME, password: 'pass'
-      redis.client.url.must_equal 'redis://:pass@127.0.0.1:16379/0'
+      redis.url.must_equal 'redis://:pass@127.0.0.1:16379/0'
     end
 
   end
