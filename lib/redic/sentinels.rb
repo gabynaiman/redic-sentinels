@@ -67,7 +67,9 @@ class Redic
     attr_reader :redis
 
     def forward
-      yield
+      yield.tap do |result|
+        @retry_attempts = 0
+      end
     rescue => ex
       @retry_attempts ||= 0
       if @retry_attempts < @max_retries
