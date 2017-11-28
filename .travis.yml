@@ -7,7 +7,15 @@ rvm:
   - 2.2
   - 2.3.0
   - 2.4.0
-  - jruby
+  - jruby-1.7.25
+  - jruby-9.1.7.0
+  - ruby-head
+  - jruby-head
+matrix:
+  fast_finish: true
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-head
 before_install:
   - gem install bundler
 services:
