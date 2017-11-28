@@ -16,6 +16,7 @@ class Redic
       @password    = options[:password]
       @db          = options.fetch(:db, 0)
       @timeout     = options[:timeout]
+      @max_retries = options.fetch(:max_retries, 3)
 
       establish_connection
     end
@@ -66,10 +67,18 @@ class Redic
     attr_reader :redis
 
     def forward
-      yield
-    rescue Errno::ECONNREFUSED
-      establish_connection
-      retry
+      yield.tap do |result|
+        @retry_attempts = 0
+      end
+    rescue => ex
+      @retry_attempts ||= 0
+      if @retry_attempts < @max_retries
+        establish_connection
+        @retry_attempts += 1
+        retry
+      else
+        raise ex
+      end
     end
 
     def establish_connection

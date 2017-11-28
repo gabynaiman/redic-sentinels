@@ -38,7 +38,8 @@ hosts = [
 redis = Redic::Sentinels.new hosts: hosts, 
                              master_name: 'mymaster', 
                              db: 1, # optional (default: 0)
-                             password: 'pass' # optional
+                             password: 'pass', # optional
+                             max_retries: 5 # optional (default: 3): Number of attempts to reconnect to master
 
 redis.call 'PING' # => 'PONG'
 ```
