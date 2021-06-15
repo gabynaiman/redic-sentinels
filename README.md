@@ -1,10 +1,9 @@
 # Redic::Sentinels
 
 [![Gem Version](https://badge.fury.io/rb/redic-sentinels.svg)](https://rubygems.org/gems/redic-sentinels)
-[![Build Status](https://travis-ci.org/gabynaiman/redic-sentinels.svg?branch=master)](https://travis-ci.org/gabynaiman/redic-sentinels)
+[![Build Status](https://travis-ci.com/gabynaiman/redic-sentinels.svg?branch=master)](https://travis-ci.com/gabynaiman/redic-sentinels)
 [![Coverage Status](https://coveralls.io/repos/gabynaiman/redic-sentinels/badge.svg?branch=master)](https://coveralls.io/r/gabynaiman/redic-sentinels?branch=master)
 [![Code Climate](https://codeclimate.com/github/gabynaiman/redic-sentinels.svg)](https://codeclimate.com/github/gabynaiman/redic-sentinels)
-[![Dependency Status](https://gemnasium.com/gabynaiman/redic-sentinels.svg)](https://gemnasium.com/gabynaiman/redic-sentinels)
 
 Redic::Sentinels is a wrapper for the Redis client that fetches configuration details from sentinels.
 
